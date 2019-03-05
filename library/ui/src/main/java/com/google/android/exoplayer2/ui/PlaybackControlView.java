@@ -44,18 +44,20 @@ public class PlaybackControlView extends PlayerControlView {
   public static final ControlDispatcher DEFAULT_CONTROL_DISPATCHER = new DefaultControlDispatcher();
 
   /** The default fast forward increment, in milliseconds. */
-  public static final int DEFAULT_FAST_FORWARD_MS = PlayerControlView.DEFAULT_FAST_FORWARD_MS;
+  public static final int DEFAULT_FAST_FORWARD_MS = PlayerControlView.Companion
+      .getDEFAULT_FAST_FORWARD_MS();
   /** The default rewind increment, in milliseconds. */
-  public static final int DEFAULT_REWIND_MS = PlayerControlView.DEFAULT_REWIND_MS;
+  public static final int DEFAULT_REWIND_MS = PlayerControlView.Companion.getDEFAULT_REWIND_MS();
   /** The default show timeout, in milliseconds. */
-  public static final int DEFAULT_SHOW_TIMEOUT_MS = PlayerControlView.DEFAULT_SHOW_TIMEOUT_MS;
+  public static final int DEFAULT_SHOW_TIMEOUT_MS = PlayerControlView.Companion
+      .getDEFAULT_SHOW_TIMEOUT_MS();
   /** The default repeat toggle modes. */
   public static final @RepeatModeUtil.RepeatToggleModes int DEFAULT_REPEAT_TOGGLE_MODES =
-      PlayerControlView.DEFAULT_REPEAT_TOGGLE_MODES;
+      PlayerControlView.Companion.getDEFAULT_REPEAT_TOGGLE_MODES();
 
   /** The maximum number of windows that can be shown in a multi-window time bar. */
   public static final int MAX_WINDOWS_FOR_MULTI_WINDOW_TIME_BAR =
-      PlayerControlView.MAX_WINDOWS_FOR_MULTI_WINDOW_TIME_BAR;
+      PlayerControlView.Companion.getMAX_WINDOWS_FOR_MULTI_WINDOW_TIME_BAR();
 
   public PlaybackControlView(Context context) {
     super(context);
