@@ -21,6 +21,7 @@ import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
 import android.os.Looper
 import android.os.SystemClock
+import android.support.v4.content.res.ResourcesCompat
 import android.util.AttributeSet
 import android.view.*
 import android.widget.FrameLayout
@@ -139,6 +140,14 @@ import java.util.*
  *
  *  * Type: [TimeBar]
  *
+ *  * **`exo_quality_change`** - Quality change.
+ *
+ *  * Type: [ImageView]
+ *
+ *  * **`exo_fullscreen_btn`** - The fullscreen button.
+ *
+ *  * Type: [ImageView]
+ *
  *
  *
  *
@@ -171,6 +180,7 @@ open class PlayerControlView(
     private val rewindButton: View?
     private val repeatToggleButton: ImageView?
     private val qualityChangeView: ImageView?
+    private val fullscreenView: ImageView?
     private val shuffleButton: View?
     private val durationView: TextView?
     private val positionView: TextView?
@@ -315,12 +325,14 @@ open class PlayerControlView(
         repeatToggleButton?.setOnClickListener(componentListener)
         qualityChangeView = findViewById(R.id.exo_quality_change)
         qualityChangeView?.setOnClickListener(componentListener)
+        fullscreenView = findViewById(R.id.exo_fullscreen_btn)
+        fullscreenView?.setOnClickListener(componentListener)
         shuffleButton = findViewById(R.id.exo_shuffle)
         shuffleButton?.setOnClickListener(componentListener)
         val resources = context.resources
-        repeatOffButtonDrawable = resources.getDrawable(R.drawable.exo_controls_repeat_off)
-        repeatOneButtonDrawable = resources.getDrawable(R.drawable.exo_controls_repeat_one)
-        repeatAllButtonDrawable = resources.getDrawable(R.drawable.exo_controls_repeat_all)
+        repeatOffButtonDrawable = ResourcesCompat.getDrawable(resources, R.drawable.exo_controls_repeat_off, null)!!
+        repeatOneButtonDrawable = ResourcesCompat.getDrawable(resources, R.drawable.exo_controls_repeat_one, null)!!
+        repeatAllButtonDrawable = ResourcesCompat.getDrawable(resources, R.drawable.exo_controls_repeat_all, null)!!
         repeatOffButtonContentDescription = resources.getString(R.string.exo_controls_repeat_off_description)
         repeatOneButtonContentDescription = resources.getString(R.string.exo_controls_repeat_one_description)
         repeatAllButtonContentDescription = resources.getString(R.string.exo_controls_repeat_all_description)
@@ -689,8 +701,8 @@ open class PlayerControlView(
                 val extraAdGroupCount = extraAdGroupTimesMs!!.size
                 val totalAdGroupCount = adGroupCount + extraAdGroupCount
                 if (totalAdGroupCount > adGroupTimesMs!!.size) {
-                    adGroupTimesMs = Arrays.copyOf(adGroupTimesMs!!, totalAdGroupCount)
-                    playedAdGroups = Arrays.copyOf(playedAdGroups!!, totalAdGroupCount)
+                    adGroupTimesMs = adGroupTimesMs!!.copyOf(totalAdGroupCount)
+                    playedAdGroups = playedAdGroups!!.copyOf(totalAdGroupCount)
                 }
                 System.arraycopy(extraAdGroupTimesMs!!, 0, adGroupTimesMs!!, adGroupCount, extraAdGroupCount)
                 System.arraycopy(extraPlayedAdGroups!!, 0, playedAdGroups!!, adGroupCount, extraAdGroupCount)
@@ -907,7 +919,7 @@ open class PlayerControlView(
         return true
     }
 
-    private inner class ComponentListener() : Player.EventListener, TimeBar.OnScrubListener, View.OnClickListener {
+    private inner class ComponentListener : Player.EventListener, TimeBar.OnScrubListener, View.OnClickListener {
 
         override fun onScrubStart(timeBar: TimeBar, position: Long) {
             scrubbing = true
@@ -961,19 +973,35 @@ open class PlayerControlView(
                     fastForwardButton === view -> fastForward()
                     rewindButton === view -> rewind()
                     playButton === view -> {
-                        if (this@PlayerControlView.player!!.getPlaybackState() == Player.STATE_IDLE) {
+                        if (this@PlayerControlView.player!!.playbackState == Player.STATE_IDLE) {
                             if (playbackPreparer != null) {
                                 playbackPreparer!!.preparePlayback()
                             }
-                        } else if (this@PlayerControlView.player!!.getPlaybackState() == Player.STATE_ENDED) {
-                            controlDispatcher!!.dispatchSeekTo(this@PlayerControlView.player, this@PlayerControlView.player!!.getCurrentWindowIndex(), C.TIME_UNSET)
+                        } else if (this@PlayerControlView.player!!.playbackState == Player.STATE_ENDED) {
+                            controlDispatcher!!.dispatchSeekTo(
+                                    this@PlayerControlView.player,
+                                    this@PlayerControlView.player!!.currentWindowIndex,
+                                    C.TIME_UNSET
+                            )
                         }
-                        controlDispatcher!!.dispatchSetPlayWhenReady(this@PlayerControlView.player, true)
+                        controlDispatcher!!.dispatchSetPlayWhenReady(
+                                this@PlayerControlView.player,
+                                true
+                        )
                     }
-                    pauseButton === view -> controlDispatcher!!.dispatchSetPlayWhenReady(this@PlayerControlView.player, false)
+                    pauseButton === view -> controlDispatcher!!.dispatchSetPlayWhenReady(
+                            this@PlayerControlView.player,
+                            false
+                    )
                     repeatToggleButton === view -> controlDispatcher!!.dispatchSetRepeatMode(
-                            this@PlayerControlView.player, RepeatModeUtil.getNextRepeatMode(this@PlayerControlView.player!!.getRepeatMode(), repeatToggleModes))
-                    shuffleButton === view -> controlDispatcher!!.dispatchSetShuffleModeEnabled(this@PlayerControlView.player, !this@PlayerControlView.player!!.getShuffleModeEnabled())
+                            this@PlayerControlView.player, RepeatModeUtil.getNextRepeatMode(
+                            this@PlayerControlView.player!!.repeatMode,
+                            repeatToggleModes
+                    ))
+                    shuffleButton === view -> controlDispatcher!!.dispatchSetShuffleModeEnabled(
+                            this@PlayerControlView.player,
+                            !this@PlayerControlView.player!!.shuffleModeEnabled
+                    )
                     qualityChangeView === view -> TODO("")
                 }
             }
@@ -987,19 +1015,19 @@ open class PlayerControlView(
         }
 
         /** The default fast forward increment, in milliseconds.  */
-        val DEFAULT_FAST_FORWARD_MS = 15000
+        const val DEFAULT_FAST_FORWARD_MS = 15000
         /** The default rewind increment, in milliseconds.  */
-        val DEFAULT_REWIND_MS = 5000
+        const val DEFAULT_REWIND_MS = 5000
         /** The default show timeout, in milliseconds.  */
-        val DEFAULT_SHOW_TIMEOUT_MS = 5000
+        const val DEFAULT_SHOW_TIMEOUT_MS = 5000
         /** The default repeat toggle modes.  */
         @RepeatModeUtil.RepeatToggleModes
         val DEFAULT_REPEAT_TOGGLE_MODES = RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE
 
         /** The maximum number of windows that can be shown in a multi-window time bar.  */
-        val MAX_WINDOWS_FOR_MULTI_WINDOW_TIME_BAR = 100
+        const val MAX_WINDOWS_FOR_MULTI_WINDOW_TIME_BAR = 100
 
-        private val MAX_POSITION_FOR_SEEK_TO_PREVIOUS: Long = 3000
+        private const val MAX_POSITION_FOR_SEEK_TO_PREVIOUS: Long = 3000
 
         @RepeatModeUtil.RepeatToggleModes
         private fun getRepeatToggleModes(

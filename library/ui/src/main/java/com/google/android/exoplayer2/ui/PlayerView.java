@@ -345,7 +345,7 @@ public class PlayerView extends FrameLayout implements AdsLoader.AdViewProvider 
     boolean useController = true;
     int surfaceType = SURFACE_TYPE_SURFACE_VIEW;
     int resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
-    int controllerShowTimeoutMs = PlayerControlView.Companion.getDEFAULT_SHOW_TIMEOUT_MS();
+    int controllerShowTimeoutMs = PlayerControlView.DEFAULT_SHOW_TIMEOUT_MS;
     boolean controllerHideOnTouch = true;
     boolean controllerAutoShow = true;
     boolean controllerHideDuringAds = true;
