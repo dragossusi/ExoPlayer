@@ -266,6 +266,26 @@ open class PlayerControlView(
         fun onVisibilityChange(visibility: Int)
     }
 
+    /**
+     * Listener to be notified when quality change button is clicked
+     *
+     * @author Dragos
+     * @since 06-Mar-19
+     */
+    interface OnQualityChangeClickedListener {
+        fun onQualityChangeClicked(qualityChangeView: ImageView)
+    }
+
+    /**
+     * Listener to be notified when full screen button is clicked
+     *
+     * @author Dragos
+     * @since 06-Mar-19
+     */
+    interface OnFullScreenButtonClickedListener {
+        fun onFullScreenButtonClicked(fullScreenView: ImageView)
+    }
+
     init {
         var controllerLayoutId = R.layout.exo_player_control_view
         rewindMs = DEFAULT_REWIND_MS
@@ -919,6 +939,24 @@ open class PlayerControlView(
         return true
     }
 
+    var onFullScreenButtonClickedListener: OnFullScreenButtonClickedListener? = null
+        set(value) {
+            field = value
+            fullscreenView?.let {
+                if (field == null) visibility = View.GONE
+                else visibility = View.VISIBLE
+            }
+        }
+
+    var onQualityChangeClickedListener: OnQualityChangeClickedListener? = null
+        set(value) {
+            field = value
+            qualityChangeView?.let {
+                if (field == null) visibility = View.GONE
+                else visibility = View.VISIBLE
+            }
+        }
+
     private inner class ComponentListener : Player.EventListener, TimeBar.OnScrubListener, View.OnClickListener {
 
         override fun onScrubStart(timeBar: TimeBar, position: Long) {
@@ -1002,7 +1040,8 @@ open class PlayerControlView(
                             this@PlayerControlView.player,
                             !this@PlayerControlView.player!!.shuffleModeEnabled
                     )
-                    qualityChangeView === view -> TODO("")
+                    qualityChangeView === view -> onQualityChangeClickedListener?.onQualityChangeClicked(qualityChangeView)
+                    fullscreenView === view -> onFullScreenButtonClickedListener?.onFullScreenButtonClicked(fullscreenView)
                 }
             }
         }
